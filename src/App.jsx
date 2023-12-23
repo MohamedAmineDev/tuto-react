@@ -114,4 +114,5 @@ function Item({ item, handleRemoveItem }) {
     </li>
   );
 }
+export { Search, List, Item, reducer };
 export default App;
