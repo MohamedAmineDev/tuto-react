@@ -1,0 +1,91 @@
+import React from 'react'
+import './App.css'
+const localKey = 'search';
+const apiLink = "https://hn.algolia.com/api/v1/search?query=";
+
+function App() {
+  // Variables
+  const [stories, setStories] = React.useState([]);
+  const [searchWord, setSearchWord] = React.useState(localStorage.getItem(localKey) || "");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
+  // Use effects
+  React.useEffect(() => {
+    localStorage.setItem(localKey, searchWord);
+    //setStories(initialStories.filter((item) => item.title.toLowerCase().includes(searchWord.toLowerCase()) == true))
+    setIsLoading(true);
+  }, [searchWord]);
+  React.useEffect(() => {
+    if (isLoading) {
+      fetch(`${apiLink}${searchWord}`)
+        .then((response) => response.json())
+        .then((result) => setStories(result.hits))
+        .catch(() => {
+          setIsError(true);
+          setStories([]);
+        });
+      setIsLoading(false);
+    }
+  }, [isLoading]);
+  function handleRemoveItem(item) {
+    let newStories = stories.filter((i) => i.objectID != item.objectID);
+    setStories(newStories);
+  }
+  return (
+    <div>
+      <h1>My Hacker Stories</h1>
+      <Search searchWord={searchWord} setSearchWord={setSearchWord} />
+      <List stories={stories} handleRemoveItem={handleRemoveItem} isLoading={isLoading} isError={isError} />
+    </div>
+  )
+}
+
+function Search({ searchWord, setSearchWord }) {
+
+  function handleInput(e) {
+    setSearchWord(e.currentTarget.value);
+    //localStorage.setItem(localKey,e.currentTarget.value);
+  }
+  return (
+    <div>
+      <label htmlFor='search'>Search : </label>
+      <input id='search' type='text' onChange={handleInput} value={searchWord} />
+      <div>
+        <p>You are searching for <strong>{searchWord}</strong></p>
+      </div>
+      <hr />
+    </div>
+  );
+}
+function List({ stories, handleRemoveItem, isLoading, isError }) {
+  return (
+    <>
+      {isError ? (<p>Something went wrong !</p>) : (<p></p>)}
+      {isLoading ? (<p>Is Loading...</p>) : (
+        <ul key={stories.lenght * 3}>
+          {stories.map((item) => {
+            return (
+              <Item key={item.objectID} item={item} handleRemoveItem={handleRemoveItem} />
+            );
+          })}
+        </ul>
+      )}
+    </>
+  );
+}
+function Item({ item, handleRemoveItem }) {
+  return (
+    <li >
+      <a href={item.url}>{item.title}</a>
+      <span> {item.author}</span>
+      <span> {item.num_comments}</span>
+      <span> {item.points}</span>
+      <span>
+        <button className='btn' onClick={() => {
+          handleRemoveItem(item);
+        }}>Dismess</button>
+      </span>
+    </li>
+  );
+}
+export default App;
