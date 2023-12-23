@@ -36,6 +36,7 @@ function App() {
   React.useEffect(() => {
     if (searchWord != '') {
       setUrl(`${apiLink}${searchWord}`);
+      localStorage.setItem(localKey, searchWord);
     }
   }, [searchWord]);
   React.useEffect(() => {
@@ -57,21 +58,21 @@ function App() {
     let newStories = state.data.filter((i) => i.objectID != item.objectID);
     dispatch({ type: ACTIONS.IS_DELETEING, data: newStories });
   }
+  function handleInput(e) {
+    setSearchWord(e.currentTarget.value);
+  }
   return (
     <div>
       <h1>My Hacker Stories</h1>
-      <Search searchWord={searchWord} setSearchWord={setSearchWord} />
+      <Search searchWord={searchWord} handleInput={handleInput} />
       <List state={state} handleRemoveItem={handleRemoveItem} />
     </div>
   )
 }
 
-function Search({ searchWord, setSearchWord }) {
+function Search({ searchWord, handleInput }) {
 
-  function handleInput(e) {
-    setSearchWord(e.currentTarget.value);
-    //localStorage.setItem(localKey,e.currentTarget.value);
-  }
+  
   return (
     <div>
       <label htmlFor='search'>Search : </label>
@@ -114,5 +115,5 @@ function Item({ item, handleRemoveItem }) {
     </li>
   );
 }
-export { Search, List, Item, reducer };
+export { Search, List, Item, reducer, ACTIONS };
 export default App;
